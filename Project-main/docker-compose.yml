@@ -1,0 +1,65 @@
+version: '2'
+services:
+    discovery-service:
+        image: akhilareddyc/discovery-service:build-01
+        ports:
+            -   8990:8761
+
+    config-service:
+        image: akhilareddyc/config-service:build-01
+        ports:
+            -   8992:8995
+        depends_on:
+            -   discovery-service
+        environment:
+            eureka.client.enabled: 'true'
+            eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka
+
+    gateway-service:
+        image: akhilareddyc/api-gateway-service:build-01
+        ports:
+            -   8991:8991
+        depends_on:
+            -   discovery-service
+            -   config-service
+        environment:
+            eureka.client.enabled: 'true'
+            eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka
+
+    auth-service:
+        image: akhilareddyc/auth-service:build-01
+        ports:
+            -   8996:8992
+        depends_on:
+            -   discovery-service
+            -   config-service
+            -   gateway-service
+        environment:
+            eureka.client.enabled: 'true'
+            eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka
+
+    component-process-service:
+        image: akhilareddyc/component-process-service:build-01
+        ports:
+            -   8998:8993
+        depends_on:
+            -   discovery-service
+            -   config-service
+            -   gateway-service
+            -   auth-service
+        environment:
+            eureka.client.enabled: 'true'
+            eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka
+            
+    package-delivery-service:
+        image: akhilareddyc/package-service:build-01
+        ports:
+            -   9000:8996
+        depends_on:
+            -   discovery-service
+            -   config-service
+            -   gateway-service
+            -   auth-service
+        environment:
+            eureka.client.enabled: 'true'
+            eureka.client.serviceUrl.defaultZone: http://discovery-service:8761/eureka
